@@ -147,6 +147,20 @@ Output goes to `dist/` per `tsconfig.json`.
 
 GitHub Actions workflow: `.github/workflows/perf-test.yml` — installs deps, Playwright Chromium, runs `npm run test:perf -- --dry-run`. Adjust secrets and `RUN_PHASE` to match your staging policy.
 
+### Running on Windows
+
+The `npm run e2e` script uses a Bash wrapper (`scripts/e2e.sh`). To run this on Windows, you have three options:
+
+1. **WSL 2 (Recommended):** Run `npm run e2e` inside an Ubuntu WSL 2 terminal with Docker Desktop configured to use the WSL 2 backend. It will work exactly like Linux/Mac.
+2. **Git Bash:** Run `npm run e2e` from Git Bash for Windows.
+3. **Native PowerShell:** If you cannot use Bash, you can run the underlying Node.js commands directly:
+   ```powershell
+   # 1. Start Docker stack manually
+   docker compose up -d
+   # 2. Run the actual orchestrator
+   npm run test:perf
+   ```
+
 ---
 
 ## 5. How to analyze results
