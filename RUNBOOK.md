@@ -22,6 +22,7 @@ A short guide on **what to run**, **in what order**, and **where to find things*
 | Visual diff PNGs | `diffs/{run-id}/` |
 | Playwright recordings | `recordings/{run-id}/` |
 | Grafana dashboard | http://localhost:3001 (admin / admin) |
+| **Dashboard UI** | **`dashboard/`** → http://localhost:4000 |
 
 ---
 
@@ -244,7 +245,45 @@ npm run report:pdf -- --run-id <uuid> --out ./my-report.pdf
 
 ---
 
-## 📋 Full Command Reference
+## 🖥️ Local Dashboard UI
+
+A browser-based dashboard to **run any operation and view PDF reports** — no terminal needed.
+
+### Start the dashboard
+
+```bash
+# Make sure node is on your PATH first (if using nvm):
+export PATH="$HOME/.nvm/versions/node/v22.22.1/bin:$PATH"
+
+# Then start from the project root:
+node dashboard/server.js
+```
+
+Open **http://localhost:4000** in your browser.
+
+> **Tip:** Add `npm run dashboard` to your shell startup or run it in a dedicated terminal tab — it's lightweight and stays out of the way.
+
+### What you can do from the UI
+
+| Action | Equivalent CLI command |
+|--------|------------------------|
+| Run E2E Phase 1 / 2 / 3 | `npm run e2e` / `e2e:phase2` / `e2e:phase3` |
+| Generate PDF Report | `npm run report:pdf` |
+| Capture Baselines | `npm run capture-baselines` |
+| Sitemap Preview | `npm run sitemap:preview` |
+| Unit Tests | `npm test` |
+
+### Tabs
+
+- **Terminal** — live streaming output with colour rendering as the job runs
+- **Reports** — lists every run ID from `raw-reports/` and `reports/`; shows JSON count, PDF, and HTML badges; one-click **View PDF** or **Generate PDF** per run
+- **PDF Viewer** — renders the selected PDF inline inside the browser
+
+### Stop a running job
+
+Click **⏹ Stop Running Job** in the sidebar. This sends `SIGKILL` to the entire process group (npm → bash → tsx → chrome), so it stops immediately.
+
+---
 
 | Command | What it does |
 |---------|-------------|
@@ -256,6 +295,7 @@ npm run report:pdf -- --run-id <uuid> --out ./my-report.pdf
 | `npm run e2e:dry` | Phase 3 dry-run (no side-effects) |
 | `npm run sitemap:preview` | Preview sitemap sampling — no browser |
 | `npm run report:pdf` | Generate PDF report from latest run |
+| `node dashboard/server.js` | Start local Dashboard UI on port 4000 |
 | `npm run docker:up` | Start TimescaleDB + Grafana containers |
 | `npm run docker:down` | Stop containers |
 | `npm test` | Unit tests (Vitest) |

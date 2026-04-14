@@ -170,10 +170,14 @@ app.post('/api/run', (req, res) => {
   }
 
   const proc = spawn(NPM, args, {
-    cwd:   ROOT_DIR,
-    env:   { ...process.env, FORCE_COLOR: '1' },
-    shell: false,
+    cwd:      ROOT_DIR,
+    env:      { ...process.env, FORCE_COLOR: '1' },
+    shell:    false,
+    detached: true,   // put the whole process tree in its own process group
+    stdio:    ['ignore', 'pipe', 'pipe'],
   });
+  // Unref so the dashboard itself can exit independently if needed
+  proc.unref();
 
   job = {
     proc,
@@ -201,8 +205,19 @@ app.post('/api/run', (req, res) => {
 // ── POST /api/kill ────────────────────────────────────────────────────────────
 app.post('/api/kill', (_req, res) => {
   if (!job || !job.proc) return res.json({ ok: true, message: 'No running job' });
-  job.proc.kill('SIGTERM');
-  res.json({ ok: true, message: 'SIGTERM sent' });
+
+  const pgid = job.proc.pid;
+  broadcast('\n\x1b[33m[dashboard] Stopping job (killing process group)…\x1b[0m\n');
+
+  try {
+    // Kill the entire process group (negative pid = group id) so bash/tsx/chrome all die
+    process.kill(-pgid, 'SIGKILL');
+  } catch (e) {
+    // Fallback: kill just the direct child
+    try { job.proc.kill('SIGKILL'); } catch {}
+  }
+
+  res.json({ ok: true, message: 'Process group killed' });
 });
 
 // ── GET /api/log (SSE) ────────────────────────────────────────────────────────
